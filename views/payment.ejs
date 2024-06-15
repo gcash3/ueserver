@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             console.log("Success:", data);
-            const ws = new WebSocket('ws://localhost:3000');
+            const ws = new WebSocket('ws://uesevere-4e86768138cc.herokuapp.com:3000');
             ws.onmessage = function(event) {
                 const message = JSON.parse(event.data);
                 document.body.style.filter = "";
