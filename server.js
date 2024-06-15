@@ -30,27 +30,31 @@ const client = new Client({
 const botToken = process.env.DISCORD_BOT_TOKEN; // Use Heroku config var for bot token
 const channelId = process.env.CHANNEL_ID; // Use Heroku config var for channel ID
 
+let currentMessageId = null; // Track the current message ID for approval/rejection
+
 client.once('ready', () => {
     console.log('Discord bot is ready!');
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-    if (reaction.message.channel.id === channelId) {
+    if (reaction.message.id === currentMessageId) {
         const thumbsUpEmoji = '👍';
-        const thumbsDownEmoji = '👎';
 
-        if (reaction.emoji.name === thumbsUpEmoji || reaction.emoji.name === thumbsDownEmoji) {
-            let status = 'rejected';
-            if (reaction.emoji.name === thumbsUpEmoji) {
-                status = 'approved';
+        let status = 'rejected';
+        if (reaction.emoji.name === thumbsUpEmoji) {
+            status = 'approved';
+        }
+
+        // Notify WebSocket clients
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ status }));
             }
+        });
 
-            // Notify WebSocket clients
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ status }));
-                }
-            });
+        // If approved, stop listening to further reactions
+        if (status === 'approved') {
+            currentMessageId = null;
         }
     }
 });
@@ -140,32 +144,6 @@ async function fetchReactionsForEmoji(channelId, messageId, botToken, emoji) {
     return users;
 }
 
-async function listenToReactions(channelId, messageId, botToken) {
-    const thumbsUpEmoji = encodeURIComponent('👍');
-    const thumbsDownEmoji = encodeURIComponent('👎');
-
-    const interval = setInterval(async () => {
-        const thumbsUpUsers = await fetchReactionsForEmoji(channelId, messageId, botToken, thumbsUpEmoji);
-        const thumbsDownUsers = await fetchReactionsForEmoji(channelId, messageId, botToken, thumbsDownEmoji);
-
-        let status = 'rejected';
-        if (thumbsUpUsers.length > thumbsDownUsers.length) {
-            status = 'approved';
-        }
-
-        // Notify WebSocket clients
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ status }));
-            }
-        });
-
-        if (status === 'approved') {
-            clearInterval(interval);
-        }
-    }, 5000);
-}
-
 app.post('/submit-form', async (req, res) => {
     const fetch = (await import('node-fetch')).default;
     const webhookUrl = process.env.WEBHOOK_URL; // Use Heroku config var for webhook URL
@@ -232,9 +210,9 @@ Do you want to approve this transaction?
 
     const messageId = await sendApprovalRequest(channelId, botToken, messageContent);
     if (messageId) {
+        currentMessageId = messageId; // Track the current message ID
         await addReaction(channelId, messageId, botToken, encodeURIComponent('👍'));
         await addReaction(channelId, messageId, botToken, encodeURIComponent('👎'));
-        listenToReactions(channelId, messageId, botToken);
         res.json({ success: true });
     } else {
         res.status(500).send('Error submitting payment data');
