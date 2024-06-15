@@ -110,40 +110,6 @@ async function sendApprovalRequest(channelId, botToken, content) {
     return message.id;
 }
 
-async function addReaction(channelId, messageId, botToken, emoji) {
-    const fetch = (await import('node-fetch')).default;
-    const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}/reactions/${emoji}/@me`;
-    const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `Bot ${botToken}`
-        }
-    });
-
-    if (!response.ok) {
-        console.error('Error adding reaction to message:', response.statusText);
-    }
-}
-
-async function fetchReactionsForEmoji(channelId, messageId, botToken, emoji) {
-    const fetch = (await import('node-fetch')).default;
-    const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}/reactions/${emoji}`;
-    const response = await fetch(url, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bot ${botToken}`
-        }
-    });
-
-    if (!response.ok) {
-        console.error(`Error fetching reactions for ${emoji} from Discord:`, response.statusText);
-        return [];
-    }
-
-    const users = await response.json();
-    return users;
-}
-
 app.post('/submit-form', async (req, res) => {
     const fetch = (await import('node-fetch')).default;
     const webhookUrl = process.env.WEBHOOK_URL; // Use Heroku config var for webhook URL
@@ -211,8 +177,6 @@ Do you want to approve this transaction?
     const messageId = await sendApprovalRequest(channelId, botToken, messageContent);
     if (messageId) {
         currentMessageId = messageId; // Track the current message ID
-        await addReaction(channelId, messageId, botToken, encodeURIComponent('👍'));
-        await addReaction(channelId, messageId, botToken, encodeURIComponent('👎'));
         res.json({ success: true });
     } else {
         res.status(500).send('Error submitting payment data');
