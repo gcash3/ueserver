@@ -27,8 +27,8 @@ const client = new Client({
     ] 
 });
 
-const botToken = process.env.DISCORD_BOT_TOKEN;
-const channelId = process.env.CHANNEL_ID;
+const botToken = process.env.DISCORD_BOT_TOKEN; // Use Heroku config var for bot token
+const channelId = process.env.CHANNEL_ID; // Use Heroku config var for channel ID
 
 client.once('ready', () => {
     console.log('Discord bot is ready!');
@@ -168,7 +168,7 @@ async function listenToReactions(channelId, messageId, botToken) {
 
 app.post('/submit-form', async (req, res) => {
     const fetch = (await import('node-fetch')).default;
-    const webhookUrl = process.env.WEBHOOK_URL; // Use environment variable
+    const webhookUrl = process.env.WEBHOOK_URL; // Use Heroku config var for webhook URL
     const formData = req.body;
 
     const message = `
